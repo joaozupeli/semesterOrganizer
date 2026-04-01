@@ -8,6 +8,12 @@ def imprimir() :
 
 ## 2. Imprima os números pares de 0 a 1000
 
+def imprimir_pares() :
+    number = 1000
+    for i in range(number) :
+        if i % 2 == 0:
+            print(i)
+
 ## 3.Calcule o fatorial de um número N
 
 ## 4. Juros compostos: Calcule quanto um investimento X deve render em Y anos.

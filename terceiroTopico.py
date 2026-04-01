@@ -103,12 +103,14 @@ def ordenar_numeros() :
     n1 = int(input("Informe o primeiro numero:"))
     n2 = int(input("Informe o segundo numero:"))
     n3 = int(input("Informe o terceiro numero:"))
-    if(n1 > n2 and n1 > n3) :
-        return n1
-    elif(n2 > n1 and n2 > n3) :
-        return n2
+    if(n1 > n2 and n1 > n3 and n1 < n3) :
+        return n1 , n2 , n3
+    elif(n2 > n1 and n2 > n3 and n2 < n1) :
+        return n2 , n1 , n3
+    elif(n3 > n1 and n3 > n2) :
+        return n3 , n1 , n2
     else:
-        return n3
+        return n1 , n2 , n3
 
 print(ordenar_numeros())
 
@@ -117,26 +119,14 @@ print(ordenar_numeros())
 def pedra_papel_tesoura() :
     primeira_jogada = input("Informe a primeira jogada: ")
     segunda_jogada = input("Informe a segunda jogada: ")
-    if(primeira_jogada == "papel" and segunda_jogada == "tesoura") :
-        return "Jogador 2 venceu esta rodada"
-    elif(primeira_jogada == "papel" and segunda_jogada == "pedra") :
-        return "Jogador 1 venceu esta rodada"
-    elif(primeira_jogada == "papel" and segunda_jogada == "papel") :
+    if(primeira_jogada == segunda_jogada) :
         return "Ocorreu Empate...Jogue novamente"
-    elif(primeira_jogada == "pedra" and segunda_jogada == "pedra") :
-        return "Ocorreu Empate...Jogue novamente"
-    elif(primeira_jogada == "pedra" and segunda_jogada == "papel") :
-        return "Jogador 2 venceu esta rodada"
-    elif(primeira_jogada == "pedra" and segunda_jogada == "tesoura") :
-        return "Jogador 1 venceu esta rodada"
-    elif(primeira_jogada == "tesoura" and segunda_jogada == "pedra") :
-        return "Jogador 2 venceu esta rodada"
-    elif(primeira_jogada == "tesoura" and segunda_jogada == "papel") :
-        return "Jogador 1 venceu esta rodada"
-    elif(primeira_jogada == "tesoura" and segunda_jogada == "tesoura") :
-        return "Ocorreu Empate...Jogue novamente"
+    elif(primeira_jogada == "papel" and segunda_jogada == "pedra") \
+        or (primeira_jogada == "tesoura" and segunda_jogada == "papel") \
+        or (primeira_jogada == "pedra" and segunda_jogada == "tesoura") :
+        return "Jogador A venceu esta rodada"
     else : 
-        return "Palavra inválida. Só é válido entradas com 'pedra', 'papel' ou 'tesoura'"
+        return "Jogador B venceu esta rodada"
 
 print(pedra_papel_tesoura())
 
@@ -193,6 +183,48 @@ print(crime_answers())
 
 #     Baseado nestas respostas, criar uma estrutura de seleção capaz de indicar desde um terno até bermuda e calção.
 #     Fique livre para propor mais perguntas ou até mesmo outro sistema de recomendação (viagem, esporte, filme, musica, etc)
+
+
+# QUESTOES DA SALA 
+# CALCULO MEDIA DE 5 NUMEROS COM WHILE
+#CALCULO DE MEDIA COM N NUMEROS 
+
+
+# ENTRE 0 A 100 PARA IMPRIMIR ( NUMEROS PARES ) (INFORMAR SE O NUMERO É PAR OU NAO ) (APRESENTAR A SOMA DOS NUMEROS PARES) ( A SOMA DE TODOS OS MULTIPLOS DE 5)
+# i = 0
+# soma_p = 0
+# soma_i = 0
+
+# while i <= 100 :
+#   if(i / 2 == 0):
+#       print(str(i) + " Esse numero é par")
+#       soma_p += i
+#       print(soma_p)
+#   else :
+#     print(str(i) + " Esse numero é impar")
+#     soma_i += i
+#     print(soma_i)
+
+  
+#   i += 1
+
+
+#LOGIN UTILIZANDO WHILE PARA LIMITAR O NUMERO DE TENTATIVAS DO USUARIO
+
+# usuario = "zupeli"
+# senha = int(0306)
+# contador = 0
+
+# login = input("Digite o seu nome de usuario: ")
+# password = int(input("Digite a sua senha: "))
+
+# while(login == usuario and password == senha):
+#   print("Login suceed")
+# else:
+#   contador += 1
+
+# if(contador = 5):
+#   print("Limite de tentativas excedida")
 
 
 
