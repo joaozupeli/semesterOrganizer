@@ -21,6 +21,13 @@ print(imprimir_pares())
 
 ## 4. Juros compostos: Calcule quanto um investimento X deve render em Y anos.
 
+def calcular_juros_compostos():
+montante = 0
+capital = float(input("Digite o capital investido: "))
+taxa_juros = float(input("Digite a taxa de juros: "))
+tempo = int(input("Digite o tempo de investimento: "))
+juros_compostos = montante - capital
+
 ## 5. Informe o N-ésimo elemento de uma P.A de razão X.
 
 ## 6. Informe o N-ésimo elemento de uma P.G de razão X.
