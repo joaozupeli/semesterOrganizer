@@ -4,7 +4,9 @@ import time
 
 db = 'database.pkl'
 
-senha_gerente = "admin123"
+login = "admin"
+senha_gerente = "123"
+
 tentativa = 0
 
 if not os.path.exists(db):
@@ -22,19 +24,11 @@ else:
 
 print ("Bem-vindo ao sistema bancario")
 
-while True:
+escolha = ""
+
+while escolha != "0":
   escolha = input("Selecione uma opcao:\n1 - Cliente\n2 - Gerente\n3 - Salvar alteracoes em disco\n0 - Sair\n")
   if escolha == "1": ## CLIENTE
-    usuario_cliente = input("Informe o usuario:")
-    senha_cliente = input("Informe a senha:")
-    if usuario_cliente not in db:
-      print("Usuário não encontrado")
-      continue
-    else:
-      if senha_cliente != dados[usuario_cliente]["senha"]:
-        print("Senha incorreta")
-      else:
-        print("Login realizado com sucesso")
     cliente_opcoes = input("Selecione uma opcao:\n1 - Consultar saldo\n2 - Depositar valor\n3 - Sacar valor\n4 - Simular rendimento\n5 - Listar ultimas transacoes (extrato)\n6 - Sair\n")
     if cliente_opcoes == "1":
       print("Consultar saldo")
