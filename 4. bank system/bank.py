@@ -56,7 +56,6 @@ while True:
       print("Senha incorreta")
       gerente_acesso = input("Informe a senha:\t")
       tentativa += 1
-
       if tentativa == 3:
         break
     gerente_opcoes = input("Selecione uma opcao:\n1 - Criar conta\n2 - Depositar valor\n3 - Sacar valor\n4 - Simular rendimento\n5 - Listar ultimas transacoes (extrato)\n6 - Sair\n")
