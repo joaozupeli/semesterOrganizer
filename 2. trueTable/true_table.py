@@ -23,44 +23,44 @@ def calcular(op, b, a=None):
 # 3. TRANSFORMAR A FRASE EM "Arvore" (Ordem de Prioridade)
 def organizar_prioridade(expressao):
     # Limpa a frase e separa por espaços para facilitar
-    tokens = expressao.replace('(', ' ( ').replace(')', ' ) ').split()
-    pilha_operadores = []
+    expressoes = expressao.replace('(', ' ( ').replace(')', ' ) ').split()
+    arvore_operadores = []
     saida = []
 
-    for t in tokens:
+    for t in expressoes:
         if t.isupper():  # Se for letra (A, B, C...)
             saida.append(t)
         elif t == '(':
-            pilha_operadores.append(t)
+            arvore_operadores.append(t)
         elif t == ')':
-            while pilha_operadores and pilha_operadores[-1] != '(':
-                saida.append(pilha_operadores.pop())
-            pilha_operadores.pop()  # Remove o '('
+            while arvore_operadores and arvore_operadores[-1] != '(':
+                saida.append(arvore_operadores.pop())
+            arvore_operadores.pop()  # Remove o '('
         else:  # Se for conectivo (and, or, ->)
-            while (pilha_operadores and
-                   prioridade.get(pilha_operadores[-1], -1) >= prioridade.get(t, -1)):
-                saida.append(pilha_operadores.pop())
-            pilha_operadores.append(t)
+            while (arvore_operadores and
+                   prioridade.get(arvore_operadores[-1], -1) >= prioridade.get(t, -1)):
+                saida.append(arvore_operadores.pop())
+            arvore_operadores.append(t)
 
-    while pilha_operadores:
-        saida.append(pilha_operadores.pop())
+    while arvore_operadores:
+        saida.append(arvore_operadores.pop())
     return saida
 
 
 # 4. RESOLVER A CONTA FINAL
-def avaliar(posfixa, valores):
-    pilha = []
-    for t in posfixa:
+def avaliar(expressoes, valores):
+    arvore = []
+    for t in expressoes:
         if t.isupper():
-            pilha.append(valores[t])
+            arvore.append(valores[t])
         elif t == 'not':
-            v = pilha.pop()
-            pilha.append(calcular('not', v))
+            v = arvore.pop()
+            arvore.append(calcular('not', v))
         else:
-            v_dir = pilha.pop()
-            v_esq = pilha.pop()
-            pilha.append(calcular(t, v_dir, v_esq))
-    return pilha[0]
+            v_dir = arvore.pop()
+            v_esq = arvore.pop()
+            arvore.append(calcular(t, v_dir, v_esq))
+    return arvore[0]
 
 
 # 5. GERAR A TABELA (O coração do programa)
@@ -69,7 +69,7 @@ def gerar_tabela():
 
     # Descobre as letras usadas
     letras = sorted(list(set([c for c in formula if c.isupper()])))
-    posfixa = organizar_prioridade(formula)
+    expressoes = organizar_prioridade(formula)
 
     # Cabeçalho
     print("\n" + " | ".join(letras) + " | RESULTADO")
@@ -84,7 +84,7 @@ def gerar_tabela():
             valor = (i // (2 ** (n - 1 - j))) % 2 == 0
             valores[letras[j]] = valor
 
-        res = avaliar(posfixa, valores)
+        res = avaliar(expressoes, valores)
 
         linha = " | ".join(["V" if valores[l] else "F" for l in letras])
         print(f"{linha} | {'V' if res else 'F'}")
