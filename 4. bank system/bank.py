@@ -1,6 +1,7 @@
 import pickle
 import os
 from datetime import datetime
+import time
 
 db = "4. bank system/database.pkl"
 
@@ -11,6 +12,7 @@ gerente = {
 
 
 tentativa = 0
+tempo_bloqueio = 0
 
 if not os.path.exists(db):
     with open(db, 'wb') as f:
@@ -43,32 +45,33 @@ while True:
           break
       else:
         print(f"\nBem-vindo(a), {login_cliente}!")
-        cliente_atual = login_cliente
+        nome_cliente = login_cliente
+        
 
-        cliente_opcoes = input("Selecione uma opcao:\n1 - Consultar saldo\n2 - Depositar valor\n3 - Sacar valor\n4 - Simular rendimento\n5 - Listar ultimas transacoes (extrato)\n6 - Sair\n")
+        cliente_opcoes = input("Selecione uma opcao:\n1 - Consultar saldo\n2 - Depositar valor\n3 - Sacar valor\n4 - Simular rendimento\n5 - Listar ultimas transacoes (extrato)\n0 - Sair\n")
         
         if cliente_opcoes == "1": 
-          print(f"\nSaldo atual: R$ {dados[cliente_atual]['saldo']:.2f}\n \n")
+          print(f"\nSaldo atual: R$ {dados[nome_cliente]['saldo']:.2f}\n \n")
           
         elif cliente_opcoes == "2":
             valor_deposito = float(input("Informe o valor a ser depositado: "))
             if valor_deposito > 0:
-                  dados[cliente_atual]['saldo'] += valor_deposito
+                  dados[nome_cliente]['saldo'] += valor_deposito
                   
                   data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                  dados[cliente_atual]['extrato'].append(f"{data_hora} - Deposito: R$ {valor_deposito:.2f}")
+                  dados[nome_cliente]['extrato'].append(f"{data_hora} - Deposito: R$ {valor_deposito:.2f}")
                   
                   print("Depósito realizado com sucesso!")
             else:
                   print("Valor de depósito inválido.")
         elif cliente_opcoes == "3":
           valor_saque = float(input("Informe o valor a ser sacado: "))
-          if 0 < valor_saque <= dados[cliente_atual]['saldo']:
-              dados[cliente_atual]['saldo'] -= valor_saque
+          if 0 < valor_saque <= dados[nome_cliente]['saldo']:
+              dados[nome_cliente]['saldo'] -= valor_saque
               data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-              dados[cliente_atual]['extrato'].append(f"{data_hora} - Saque: R$ {valor_saque:.2f}")
+              dados[nome_cliente]['extrato'].append(f"{data_hora} - Saque: R$ {valor_saque:.2f}")
               print("Saque realizado com sucesso!")
-          elif valor_saque <= 0 or valor_saque > dados[cliente_atual]['saldo']:
+          elif valor_saque <= 0 or valor_saque > dados[nome_cliente]['saldo']:
               print("Saldo insuficiente ou valor inválido.")
           
         elif cliente_opcoes == "4":
@@ -77,7 +80,7 @@ while True:
           entrada = input("Informe o valor que você quer simular o investimento:\n")
           valor_inv = float(entrada)
           
-          saldo_atual = dados[cliente_atual]['saldo']
+          saldo_atual = dados[nome_cliente]['saldo']
 
           if valor_inv <= saldo_atual:
               taxa = 0.011
@@ -99,87 +102,104 @@ while True:
                 
         elif cliente_opcoes == "5":
           print("--- EXTRATO ---")
-          for transacao in dados[cliente_atual]['extrato']:
+          for transacao in dados[nome_cliente]['extrato']:
             print(transacao)
 
-        elif cliente_opcoes == "6":
+        elif cliente_opcoes == "0":
+          with open(db, 'wb') as f:
+            pickle.dump(dados, f)
           break
+        
         else:
           print("Opcao invalida")
 
 ## ------------ MODO GERENTE ------------ ##
 
   elif escolha == "2":
-    login_gerente = input("Informe o login:\t")
-    senha_gerente = input("Informe a senha:\t")
-    while login_gerente != gerente["login"] or senha_gerente != gerente["senha"]:
-      print("Senha incorreta")
+
+    if tempo_bloqueio > time.time():
+       restante = int(tempo_bloqueio - time.time())
+       print(f"Espere mais {restante} segundos para tentar novamente")
+
+    else:
       login_gerente = input("Informe o login:\t")
       senha_gerente = input("Informe a senha:\t")
-      tentativa += 1
-      if tentativa == 3:
-        print("Senha inválida...\tTente Novamente")
-        break
 
-    if login_gerente == gerente["login"] and senha_gerente == gerente["senha"]:
-      print("Login bem-sucedido!")
+      while login_gerente != gerente["login"] or senha_gerente != gerente["senha"]:
+        print("Senha incorreta")
+        login_gerente = input("Informe o login:\t")
+        senha_gerente = input("Informe a senha:\t")
+        tentativa += 1
 
-    while True:
-      gerente_opcoes = input("Selecione uma opcao:\n1 - Cadastrar ou alterar o nome de um cliente\n2 - Corrigir Saldo\n3 - Consultar Dados de um Cliente\n4 - Listar ultimas transacoes (extrato)\n0 - Sair\n")
-      
-      if gerente_opcoes == "1":
-          nome_cliente = input("Informe o nome do cliente:\t")
+        if tentativa == 3:
+          print("Senha inválida...\tTente Novamente mais tarde")
+          tempo_bloqueio = time.time() + 20
+          tentativa = 0
+          break
+        
+      if login_gerente == gerente["login"] and senha_gerente == gerente["senha"]:
+        print("Login bem-sucedido!")
 
-          if nome_cliente not in dados:
+        while True:
+          gerente_opcoes = input("Selecione uma opcao:\n1 - Cadastrar ou alterar o nome de um cliente\n2 - Corrigir Saldo\n3 - Consultar Dados de um Cliente\n4 - Listar ultimas transacoes (extrato)\n0 - Sair\n")
+          
+          if gerente_opcoes == "1":
+              nome_cliente = input("Informe o nome do cliente:\t")
 
-            print("Cliente não encontrado! Cadastrando novo cliente...")
-            nome_cliente = input("Informe o nome do cliente a ser cadastrado:\t")
-            dados[nome_cliente] = {
-                "nome": nome_cliente,
-                "saldo": 0, # sendo assim o saldo inicial do cliente é sempre será 0
-                "extrato": [] # extrato inicial do cliente sempre vazio
-            }
-            print(f"Cliente {nome_cliente} cadastrado com sucesso!")
+              if nome_cliente not in dados:
+
+                print("Cliente não encontrado! Cadastrando novo cliente...")
+                nome_cliente = input("Informe o nome do cliente a ser cadastrado:\t")
+                dados[nome_cliente] = {
+                    "nome": nome_cliente,
+                    "saldo": 0,
+                    "extrato": [] 
+                }
+                print(f"Cliente {nome_cliente} cadastrado com sucesso!")
+              else:
+                print(f"Cliente {nome_cliente} encontrado!")
+                novo_nome = input("Informe o novo nome do cliente:\t") 
+                dados[nome_cliente]['nome'] = novo_nome
+                print(f"Cliente {nome_cliente} alterado com sucesso!")
+                  
+          elif gerente_opcoes == "2":
+            nome_cliente = input("Informe o nome do cliente:\t")
+            if nome_cliente not in dados:
+              print("Cliente não encontrado!")
+              break
+            else:
+              print(f"Cliente {nome_cliente} encontrado!")
+              saldo_cliente = float(input("Informe o novo saldo do cliente:\t"))
+              dados[nome_cliente]['saldo'] = saldo_cliente
+              dados[nome_cliente]['extrato'].append(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} - Saldo: R$ {saldo_cliente:.2f}")
+
+              print(f"Saldo do cliente {nome_cliente} alterado com sucesso!")
+          elif gerente_opcoes == "3":
+            nome_cliente = input("Informe o nome do cliente a ser consultado:\t")
+            if nome_cliente not in dados:
+              print("Cliente não encontrado! Cadastre-o antes de consultá-lo.")
+              break
+            else:
+              print(f"Cliente {nome_cliente} encontrado!")
+              print(f"Saldo: {dados[nome_cliente]['saldo']}")
+
+          elif gerente_opcoes == "4":
+            nome_cliente = input("Informe o nome do cliente:\t")
+            if nome_cliente not in dados:
+              print("Cliente não encontrado! Cadastre-o antes de listar o extrato.")
+              break
+            else:
+              print("--- EXTRATO ---")
+              for i in dados[nome_cliente]['extrato']:
+                print(i)
+            
+
+          elif gerente_opcoes == "0":
+              with open(db, 'wb') as f:
+                pickle.dump(dados, f)
+              break
           else:
-            print(f"Cliente {nome_cliente} encontrado!")
-            novo_nome = input("Informe o novo nome do cliente:\t") 
-            dados[nome_cliente]['nome'] = novo_nome
-            print(f"Cliente {nome_cliente} alterado com sucesso!")
-              
-      elif gerente_opcoes == "2":
-        nome_cliente = input("Informe o nome do cliente:\t")
-        if nome_cliente not in dados:
-          print("Cliente não encontrado!")
-          break
-        else:
-          print(f"Cliente {nome_cliente} encontrado!")
-          saldo_cliente = float(input("Informe o novo saldo do cliente:\t"))
-          dados[nome_cliente]['saldo'] = saldo_cliente
-          dados[nome_cliente]['extrato'].append(f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} - Saldo: R$ {saldo_cliente:.2f}")
-
-          print(f"Saldo do cliente {nome_cliente} alterado com sucesso!")
-      elif gerente_opcoes == "3":
-        nome_cliente = input("Informe o nome do cliente a ser consultado:\t")
-        if nome_cliente not in dados:
-          print("Cliente não encontrado! Cadastre-o antes de consultá-lo.")
-          break
-        else:
-          print(f"Cliente {nome_cliente} encontrado!")
-          print(f"Saldo: {dados[nome_cliente]['saldo']}")
-
-      elif gerente_opcoes == "4":
-        nome_cliente = input("Informe o nome do cliente:\t")
-        if nome_cliente not in dados:
-          print("Cliente não encontrado! Cadastre-o antes de listar o extrato.")
-          break
-        else:
-          print(f"Cliente {nome_cliente} encontrado!")
-          print(f"Extrato: {dados[nome_cliente]['extrato']}")
-
-      elif gerente_opcoes == "0":
-          break
-      else:
-          print("Opcao invalida")
+              print("Opcao invalida")
 
 ## ------------ SALVAR OS DADOS, GARANTINDO A PERSISTÊNCIA DOS DADOS ------------ ##
 
@@ -193,6 +213,8 @@ while True:
       print("Alteracoes nao salvas")
 
   elif escolha == "0": ## SAIR
+    with open(db, 'wb') as f:
+        pickle.dump(dados, f)
     break
   else:
     print("Opcao invalida")
