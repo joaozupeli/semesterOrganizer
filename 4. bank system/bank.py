@@ -1,3 +1,5 @@
+## TRABALHO SISTEMA DE UM BANCO - BY: @GustavoVilela - @JoãoZupeli - @JoãoBaby - @VicenteKolrooss
+
 import pickle
 import os
 from datetime import datetime
