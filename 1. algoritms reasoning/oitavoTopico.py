@@ -20,6 +20,17 @@
 #    6. isdigit_():
 #       verifica se é um digito
 
+def isdigit_(inpt):
+    for elemento in inpt:
+        for char in elemento:
+            n_ascii = ord(char)
+            if ord('0') <= n_ascii <= ord('9'):
+                return True
+            else:
+                return False
+
+print(isdigit_(['100', '2', '3', '4', '543', '6', '7', '8', '9', '0']))
+
 #    7. ischar_():
 #       verifica se é um char
 
