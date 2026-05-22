@@ -1,15 +1,17 @@
-# 1. DEFINIR PRIORIDADES (Regra de Ouro da Lógica)
-prioridade = {
-    'not': 4,
-    'and': 3,
-    'or': 2,
-    '->': 1,
+from itertools import product
+
+# Prioridade dos conectivos (quanto maior, resolve primeiro)
+PRIORIDADE = {
+    '(': -1,
     '<->': 0,
-    '(': -1
+    '->': 1,
+    'or': 2,
+    'and': 3,
+    'XOR': 3,
+    'not': 4,
 }
 
 
-# 2. Essa parte esta designando os conectivos e os operadores logicos para que o python consiga interpretar de uma forma mais simples
 def calcular(op, b, a=None):
     if op == 'not': return not b
     if op == 'and': return a and b
@@ -17,81 +19,74 @@ def calcular(op, b, a=None):
     if op == '->':  return (not a) or b
     if op == 'XOR': return a != b
     if op == '<->': return a == b
-    return False
 
 
-# 3. TRANSFORMAR A FRASE EM "Arvore" (Ordem de Prioridade)
-def organizar_prioridade(expressao):
-    # Limpa a frase e separa por espaços para facilitar
-    expressoes = expressao.replace('(', ' ( ').replace(')', ' ) ').split()
-    arvore_operadores = []
+def para_posfixo(formula):
+    """Converte 'A and B' para ['A', 'B', 'and'] (notação posfixa)."""
+    tokens = formula.replace('(', ' ( ').replace(')', ' ) ').split()
+    pilha = []
     saida = []
 
-    for t in expressoes:
-        if t.isupper():  # Se for letra (A, B, C...)
+    for t in tokens:
+        if t.isupper() and t not in PRIORIDADE:
             saida.append(t)
         elif t == '(':
-            arvore_operadores.append(t)
+            pilha.append(t)
         elif t == ')':
-            while arvore_operadores and arvore_operadores[-1] != '(':
-                saida.append(arvore_operadores.pop())
-            arvore_operadores.pop()  # Remove o '('
-        else:  # Se for conectivo (and, or, ->)
-            while (arvore_operadores and
-                   prioridade.get(arvore_operadores[-1], -1) >= prioridade.get(t, -1)):
-                saida.append(arvore_operadores.pop())
-            arvore_operadores.append(t)
+            while pilha[-1] != '(':
+                saida.append(pilha.pop())
+            pilha.pop()
+        else:
+            while pilha and PRIORIDADE.get(pilha[-1], -1) >= PRIORIDADE[t]:
+                saida.append(pilha.pop())
+            pilha.append(t)
 
-    while arvore_operadores:
-        saida.append(arvore_operadores.pop())
+    while pilha:
+        saida.append(pilha.pop())
+
     return saida
 
 
-# 4. RESOLVER A CONTA FINAL
-def avaliar(expressoes, valores):
-    arvore = []
-    for t in expressoes:
-        if t.isupper():
-            arvore.append(valores[t])
+def avaliar(posfixo, valores):
+    """Resolve a expressão posfixa usando os valores V/F das variáveis."""
+    pilha = []
+
+    for t in posfixo:
+        if t in valores:
+            pilha.append(valores[t])
         elif t == 'not':
-            v = arvore.pop()
-            arvore.append(calcular('not', v))
+            pilha.append(calcular('not', pilha.pop()))
         else:
-            v_dir = arvore.pop()
-            v_esq = arvore.pop()
-            arvore.append(calcular(t, v_dir, v_esq))
-    return arvore[0]
+            b = pilha.pop()
+            a = pilha.pop()
+            pilha.append(calcular(t, b, a))
+
+    return pilha[0]
 
 
-# 5. GERAR A TABELA (O coração do programa)
-def gerar_tabela():
-    formula = input("Digite a fórmula (not) (and) (or) (->) (XOR) (<->) (use espaços: ( A and B ) -> C ): ")
+def tabela_verdade():
+    print("\nConectivos: not | and | or | -> | XOR | <->")
+    print("Exemplo:    ( A and B ) -> C\n")
+    formula = input("Fórmula: ")
 
-    # Descobre as letras usadas
-    letras = sorted(list(set([c for c in formula if c.isupper()])))
-    expressoes = organizar_prioridade(formula)
+    letras = sorted(set(c for c in formula if c.isupper() and c not in ('X', 'O', 'R')))
+    posfixo = para_posfixo(formula)
 
     # Cabeçalho
-    print("\n" + " | ".join(letras) + " | RESULTADO")
-    print("-" * (len(letras) * 4 + 12))
+    cabecalho = " | ".join(letras) + " | RESULTADO"
+    print("\n" + cabecalho)
+    print("-" * len(cabecalho))
 
-    # Gera combinações de V e F manualmente
-    n = len(letras)
-    for i in range(2 ** n):
-        valores = {}
-        for j in range(n):
-            # Lógica para alternar V e F como na mão
-            valor = (i // (2 ** (n - 1 - j))) % 2 == 0
-            valores[letras[j]] = valor
+    # Gera todas as combinações de V e F
+    for combo in product([True, False], repeat=len(letras)):
+        valores = dict(zip(letras, combo))
+        resultado = avaliar(posfixo, valores)
 
-        res = avaliar(expressoes, valores)
-
-        linha = " | ".join(["V" if valores[l] else "F" for l in letras])
-        print(f"{linha} | {'V' if res else 'F'}")
+        linha = " | ".join("V" if valores[l] else "F" for l in letras)
+        print(f"{linha} | {'V' if resultado else 'F'}")
 
 
-# Execução
 while True:
-    gerar_tabela()
-    if input("\nOutra? (s/n): ") == 'n': break
-
+    tabela_verdade()
+    if input("\nOutra? (s/n): ") != 's':
+        break
