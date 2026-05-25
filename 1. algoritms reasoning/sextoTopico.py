@@ -3,14 +3,61 @@
 # Para estes exercícios, é importante que você não utilize funções built-in do Python, ou seja, aquelas que já vem pré-definidas na linguagem (max, mean, min, sort, etc). O objetivo é praticar a manipulação de vetores 1D em Python utilizando apenas as estruturas de controle, como laços de repetição e estruturas condicionais. Assim você irá aprimorar sua habilidade em programação
 
 # 1. Crie um vetor de 20 elementos aleatórios
+# import random
+
+# vetor = []
+
+# for i in range(0,20):
+#   aleatorio = random.randint(0,100)
+#   vetor.append(aleatorio)
+
+# print(vetor)
+
 
 # 2. Crie um vetor de 20 elementos incrementando-os de 5 em 5
 
+# vetor = []
+# numero = 0
+
+# for i in range(0,20):
+#   numero += 5
+#   vetor.append(numero)
+
+# print(vetor)
+
 # 3. Crie um vetor contendo N elementos digitados pelo usuário
+
+# vetor = []
+# nElementos = int(input("Digite o numero de elementos: "))
+
+# for i in range(0, nElementos):
+#   numero = int(input("Digite os numeros vão compor o vetor: "))
+#   vetor.append(numero)
+
+# print(vetor)
 
 # 4. Crie um vetor contendo N elementos pares digitados pelo usuário
 
+# vetor = []
+# nElementos = int(input("Digite a quantidade de elementos que vão compor o vetor: "))
+
+# if(nElementos % 2 == 0):
+#   for i in range(0,nElementos):
+#     numero = int(input("Digite o numero para compor o vetor: "))
+#     vetor.append(numero)
+# else:
+#   print("Numero para quantidade de de elementos não é par")
+
+# print(vetor)
+
 # 5. Para cada posição [i] do vetor, imprima o valor atual, seu antecessor e sucessor
+vetor = [1,2,3,4,5,6]
+
+for i in range(0, len(vetor)-1):
+  print(vetor[i])
+  print(vetor[i-1])
+  print(vetor[i+1])
+
 
 # 6. Apresente a soma dos elementos opostos de um vetor de 100 elementos
 
