@@ -24,8 +24,9 @@ void setup() {
   for (int i = 0; i < 26; i++) {
     String path = dataPath(letras[i] + ".mp3");
     if (new File(path).exists()) {
-      sons[i] = new SoundFile(this, letras[i] + ".mp3");
+      sons[i] =  new SoundFile(this, path);
     } else {
+      println(dataPath("a.mp3"));
       println("Aviso: " + letras[i] + ".mp3 não encontrado.");
     }
   }
