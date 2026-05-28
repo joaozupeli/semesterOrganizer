@@ -1,167 +1,103 @@
-PRECEDENCIA = {
-    '<->': 0,
-    '->':  1,
-    'or':  2,
-    'and': 3,
-    'XOR': 3,
-    'not': 4,
-}
+def remover_parentese_externo(txt):
+    txt = txt.replace('(', ' ( ').replace(')', ' ) ')
+    return txt.split()
 
 
-def separar_formula(formula):
-    formula = formula.replace('(', ' ( ').replace(')', ' ) ')
-    return formula.split()
-
-
-def tem_parenteses_externos(partes):
-    if partes[0] != '(' or partes[-1] != ')':
-        return False
-
+def operador_principal(partes):
+    peso = {'<->': 0, '->': 1, 'or': 2, 'and': 3, 'XOR': 3, 'not': 4}
     nivel = 0
-    for i in range(len(partes)):
-        if partes[i] == '(':
-            nivel = nivel + 1
-        if partes[i] == ')':
-            nivel = nivel - 1
-        if nivel == 0 and i < len(partes) - 1:
-            return False
-
-    return True
-
-
-def encontrar_operador_principal(partes):
-    nivel_parenteses = 0
-    posicao_binario = -1
-    posicao_not = -1
-    menor_precedencia = 999
+    melhor = -1
+    melhor_peso = 999
+    pos_not = -1
 
     for i in range(len(partes)):
         if partes[i] == '(':
-            nivel_parenteses = nivel_parenteses + 1
-            continue
-        if partes[i] == ')':
-            nivel_parenteses = nivel_parenteses - 1
-            continue
+            nivel += 1
+        elif partes[i] == ')':
+            nivel -= 1
+        elif nivel == 0 and partes[i] in peso:
+            if partes[i] == 'not':
+                if pos_not == -1:
+                    pos_not = i
+            elif peso[partes[i]] <= melhor_peso:
+                melhor = i
+                melhor_peso = peso[partes[i]]
 
-        if nivel_parenteses > 0:
-            continue
-
-        if partes[i] not in PRECEDENCIA:
-            continue
-
-        if partes[i] == 'not':
-            if posicao_not == -1:
-                posicao_not = i
-            continue
-
-        if PRECEDENCIA[partes[i]] <= menor_precedencia:
-            posicao_binario = i
-            menor_precedencia = PRECEDENCIA[partes[i]]
-
-    if posicao_binario != -1:
-        return posicao_binario
-    return posicao_not
+    if melhor != -1:
+        return melhor
+    return pos_not
 
 
-def avaliar(partes, valores):
-    while tem_parenteses_externos(partes):
-        partes = partes[1:-1]
+def tirar_parenteses(p):
+    while p[0] == '(' and p[-1] == ')':
+        nivel = 0
+        pode = True
+        for i in range(len(p)):
+            if p[i] == '(':
+                nivel += 1
+            elif p[i] == ')':
+                nivel -= 1
+            if nivel == 0 and i < len(p) - 1:
+                pode = False
+                break
+        if pode:
+            p = p[1:-1]
+        else:
+            break
+    return p
+
+
+def calcular(partes, vals):
+    partes = tirar_parenteses(partes)
 
     if len(partes) == 1:
-        return valores[partes[0]]
+        return vals[partes[0]]
 
-    posicao = encontrar_operador_principal(partes)
-    operador = partes[posicao]
-    lado_direito = partes[posicao + 1:]
+    pos = operador_principal(partes)
+    op = partes[pos]
+    dir = partes[pos + 1:]
 
-    if operador == 'not':
-        resultado_direito = avaliar(lado_direito, valores)
-        return not resultado_direito
+    if op == 'not':
+        return not calcular(dir, vals)
 
-    lado_esquerdo = partes[:posicao]
-    resultado_esquerdo = avaliar(lado_esquerdo, valores)
-    resultado_direito = avaliar(lado_direito, valores)
+    esq = partes[:pos]
+    e = calcular(esq, vals)
+    d = calcular(dir, vals)
 
-    if operador == 'and':
-        return resultado_esquerdo and resultado_direito
-    if operador == 'or':
-        return resultado_esquerdo or resultado_direito
-    if operador == '->':
-        return (not resultado_esquerdo) or resultado_direito
-    if operador == 'XOR':
-        return resultado_esquerdo != resultado_direito
-    if operador == '<->':
-        return resultado_esquerdo == resultado_direito
-
-
-def pegar_variaveis(formula):
-    partes = separar_formula(formula)
-    variaveis = []
-    for parte in partes:
-        eh_variavel = len(parte) == 1 and parte.isupper()
-        if eh_variavel and parte not in variaveis:
-            variaveis.append(parte)
-    return sorted(variaveis)
+    if op == 'and':
+        return e and d
+    if op == 'or':
+        return e or d
+    if op == '->':
+        return (not e) or d
+    if op == 'XOR':
+        return e != d
+    if op == '<->':
+        return e == d
 
 
-def gerar_combinacoes(quantidade):
-    total = 2 ** quantidade
-    combinacoes = []
-
-    for numero in range(total):
-        combinacao = []
-        resto = numero
-        for _ in range(quantidade):
-            if resto % 2 == 0:
-                combinacao.append(True)
-            else:
-                combinacao.append(False)
-            resto = resto // 2
-        combinacao.reverse()
-        combinacoes.append(combinacao)
-
-    return combinacoes
-
-
-def tabela_verdade():
+def rodar():
     print("\nOperadores: not | and | or | -> | XOR | <->")
-    print("Exemplo: ( A and B ) -> C\n")
-    formula = input("Digite a formula: ")
+    formula = input("Formula: ")
 
-    variaveis = pegar_variaveis(formula)
-    partes = separar_formula(formula)
-    combinacoes = gerar_combinacoes(len(variaveis))
+    partes = remover_parentese_externo(formula)
+    vars = sorted(set(p for p in partes if len(p) == 1 and p.isupper()))
 
-    cabecalho = " | ".join(variaveis) + " | RESULTADO"
-    print("\n" + cabecalho)
-    print("-" * len(cabecalho))
+    n = len(vars)
+    total = 2 ** n
 
-    for combinacao in combinacoes:
-        valores = {}
-        for i in range(len(variaveis)):
-            valores[variaveis[i]] = combinacao[i]
+    print()
+    for i in range(total):
+        vals = {}
+        bits = bin(i)[2:].zfill(n)
+        for j in range(n):
+            vals[vars[j]] = bits[j] == '0'
 
-        resultado = avaliar(partes[:], valores)
-
-        pedacos = []
-        for v in variaveis:
-            if valores[v]:
-                pedacos.append("V")
-            else:
-                pedacos.append("F")
-
-        linha = " | ".join(pedacos)
-
-        if resultado:
-            linha = linha + " | V"
-        else:
-            linha = linha + " | F"
-
-        print(linha)
+        r = calcular(partes[:], vals)
+        print("V" if r else "F")
 
 
 while True:
-    tabela_verdade()
-    continuar = input("\nDeseja fazer outra tabela? (s/n): ")
-    if continuar != 's':
+    rodar()
+    if input("\nOutra? (s/n): ") != 's':
         break
