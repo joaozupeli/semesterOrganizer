@@ -17,12 +17,16 @@ vet[2] = vet[4]
 vet[5] += vet[1] + vet[3]
 print(vet)
 
+# [4,2,5,4,5,12]
+
 # b. Qual valor será impresso na tela?
 vet = [0,1]
 for i in range(2,8):
     vet.append(vet[i-1] + vet[i-2])
 
 print(vet)
+
+
 
 # c. Qual valor será impresso na tela?
 vet = [4,6,4,1,2,9,13]
