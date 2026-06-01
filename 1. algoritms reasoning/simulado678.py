@@ -9,150 +9,150 @@
 # ### 1. Testes de Mesa
 
 # a. Qual valor será impresso na tela?
-vet = [1,2,3,4,5,6]
+# vet = [1,2,3,4,5,6]
 
-vet[0] = vet[3]
-vet[3] = vet[0]
-vet[2] = vet[4]
-vet[5] += vet[1] + vet[3]
-print(vet)
+# vet[0] = vet[3]
+# vet[3] = vet[0]
+# vet[2] = vet[4]
+# vet[5] += vet[1] + vet[3]
+# print(vet)
 
 # [4,2,5,4,5,12]
 
 # b. Qual valor será impresso na tela?
-vet = [0,1]
-for i in range(2,8):
-    vet.append(vet[i-1] + vet[i-2])
+# vet = [0,1]
+# for i in range(2,8):
+#     vet.append(vet[i-1] + vet[i-2])
 
-print(vet)
+# print(vet)
 
 
 
 # c. Qual valor será impresso na tela?
-vet = [4,6,4,1,2,9,13]
-tam = len(vet)
-a = 0
+# vet = [4,6,4,1,2,9,13]
+# tam = len(vet)
+# a = 0
 
-for i in range(tam):    
-    if(vet[i] % 2 == 0):
-        a += vet[i]        
-print(a)
+# for i in range(tam):    
+#     if(vet[i] % 2 == 0):
+#         a += vet[i]        
+# print(a)
 
 
 # d. Qual valor será impresso na tela?
-vet = [4,6,4,1,2,9,13]
-tam = len(vet)
-b = 0
+# vet = [4,6,4,1,2,9,13]
+# tam = len(vet)
+# b = 0
 
-for i in range(tam):    
-    if((vet[i] + vet[tam-1-i]) % 2 == 0):
-        b += vet[i]
-print(b)
+# for i in range(tam):    
+#     if((vet[i] + vet[tam-1-i]) % 2 == 0):
+#         b += vet[i]
+# print(b)
 
 
 # e. Qual valor será impresso na tela?
-def altera(a,b):    
-    temp = a
-    a = b
-    b = temp
+# def altera(a,b):    
+#     temp = a
+#     a = b
+#     b = temp
 
-    return a,b
+#     return a,b
 
-vet = [4,6,4,1,2,9,13]
-tam = len(vet)
-for i in range(tam):    
-    m = i        
-    for j in range(i,tam):
-        if vet[j] > vet[m]:
-            m = j
+# vet = [4,6,4,1,2,9,13]
+# tam = len(vet)
+# for i in range(tam):    
+#     m = i        
+#     for j in range(i,tam):
+#         if vet[j] > vet[m]:
+#             m = j
 
-    vet[i],vet[m] = altera(vet[i],vet[m])
+#     vet[i],vet[m] = altera(vet[i],vet[m])
 
-print(vet)        
+# print(vet)        
 
 
 # f. Qual valor será impresso na tela?
-def func(n,vet):    
-    ret = False    
-    for i in range(len(vet)):
-        if n == vet[i]:
-            ret = True
-    return ret        
+# def func(n,vet):    
+#     ret = False    
+#     for i in range(len(vet)):
+#         if n == vet[i]:
+#             ret = True
+#     return ret        
 
-vet = [1,2,3,1,3,5,8,9,10,5]
-r = func(3,vet)
-print(r)
+# vet = [1,2,3,1,3,5,8,9,10,5]
+# r = func(3,vet)
+# print(r)
 
 
 # g. Qual valor será impresso na tela?
-def func_3(vetor):    
-    temp = vetor[0]
-    tam = len(vetor)
-    vetor[0] = vetor[tam-1]
-    vetor[tam-1] = temp        
-    return vetor
+# def func_3(vetor):    
+#     temp = vetor[0]
+#     tam = len(vetor)
+#     vetor[0] = vetor[tam-1]
+#     vetor[tam-1] = temp        
+#     return vetor
 
-def func_2(a):
-    a += 1
-    b = a*2    
-    return b
+# def func_2(a):
+#     a += 1
+#     b = a*2    
+#     return b
 
-def func_1(vet):    
-    for i in range(len(vet)):
-        vet[i] = func_2(vet[i])        
-    return vet    
+# def func_1(vet):    
+#     for i in range(len(vet)):
+#         vet[i] = func_2(vet[i])        
+#     return vet    
 
-vet = [1,2,3,4,5]
-print(vet)
+# vet = [1,2,3,4,5]
+# print(vet)
 
-vet = func_11([4,5,6,7,8]) #ERRO QUE JA ESTA MOSTRANDO EXEMPLO
-print(vet)
+# vet = func_11([4,5,6,7,8]) #ERRO QUE JA ESTA MOSTRANDO EXEMPLO
+# print(vet)
 
-vet = func_3(vet)
-print(vet)
+# vet = func_3(vet)
+# print(vet)
 
 
 # h. Qual valor será impresso na tela?
-vet = [66,111,109,32,100,105,97]
+# vet = [66,111,109,32,100,105,97]
 
-for i in range(len(vet)):
-    print(chr(vet[i]), end='')
+# for i in range(len(vet)):
+#     print(chr(vet[i]), end='')
 
-print()
+# print()
 
 
 # i. Qual valor será impresso na tela?
-def avalia(string):
-    count = 0
-    for char in string:
-        ascii_value = ord(char)
-        if 65 <= ascii_value <= 90 or 97 <= ascii_value <= 122:
-            count += 1
-    return count
+# def avalia(string):
+#     count = 0
+#     for char in string:
+#         ascii_value = ord(char)
+#         if 65 <= ascii_value <= 90 or 97 <= ascii_value <= 122:
+#             count += 1
+#     return count
 
-texto = "aB@c@dabra1234"
-resultado = avalia(texto)
-print(resultado)
+# texto = "aB@c@dabra1234"
+# resultado = avalia(texto)
+# print(resultado)
 
 
 # j. Qual valor será impresso na tela?
-def modifica(string):
-    count = 0
-    new_str = ''
-    for char in string:
-        ascii_value = ord(char)
-        if 65 <= ascii_value <= 90:
-            new_str += chr(ascii_value + 32)
-        elif 97 <= ascii_value <= 122:
-            new_str += chr(ascii_value - 32)            
-        else:
-            new_str += char
+# def modifica(string):
+#     count = 0
+#     new_str = ''
+#     for char in string:
+#         ascii_value = ord(char)
+#         if 65 <= ascii_value <= 90:
+#             new_str += chr(ascii_value + 32)
+#         elif 97 <= ascii_value <= 122:
+#             new_str += chr(ascii_value - 32)            
+#         else:
+#             new_str += char
 
-    return new_str
+#     return new_str
 
-texto = "Em 24/06/2023 fez UM belo DIA de Sol"
-resultado = modifica(texto)
-print(resultado)
+# texto = "Em 24/06/2023 fez UM belo DIA de Sol"
+# resultado = modifica(texto)
+# print(resultado)
 
 # **OBS**: Em teste de mesa, podem existir variações destes exercícios, no qual se pede para corrigir o código apresentado.
 
@@ -160,31 +160,78 @@ print(resultado)
 
 # a. Crie um vetor com 1000 números aleatórios, no entanto pares . (Dica: fique sorteando números e so incluia se for par. Facilita utilizar um while() ao invés do for)
 
+import random
+
+# vetor = []
+
+# while len(vetor) < 1000:
+#     numero = random.randint(0,100)
+#     if numero % 2 == 0:
+#         vetor.append(numero)
+#     print(vetor)
+
+
+
 # b. Adicione números ao vetor, até que a soma deles ultrapasse 100mil.
 
+# vetor = []
+
+# while sum(vetor) < 100000:
+#     numero = random.randint(100,1000)
+# print(vetor)
+
 # c. Dado um vetor de 100 posições, calcule a média dos elementos múltiplos de 5
+
+# vetor = [random.randint(0, 100) for _ in range(100)]
+# multiplo_cinco = 0
+# quantidade_multiplos = 0
+# media = 0
+
+# for numero in vetor:
+#     if numero % 5 == 0:
+#         multiplo_cinco += numero
+#         quantidade_multiplos += 1
+#         media = multiplo_cinco / quantidade_multiplos
+# print(multiplo_cinco)
+# print(quantidade_multiplos)
+# print(media)
+    
+
 
 # d. Dado um vetor de N posições, cálcule a soma dos produtos, sendo o índice o fato de multiplicação. Exemplo:
 
 #     [9,2,3,7,19,.....] = 9x0 + 2x1 + 3x2, 7x3, 19x4 .....
 
+# posicoes = int(input())
+
+# vetor = [random.randint(0,100) for i in range(0,posicoes)]
+# soma = 0
+
+# for i in range(len(vetor)):
+#     soma += vetor[i] * i
+
+# print(soma)
 # e. Determine uma função que recebe um valor N e cria um vetor contendo a série de fibonacci até N.
+vet_fibonacci = []
 
-#     def **fibo**(n):
+def fibonacci(n):
+    for i in range(0,n):
+        if len(vet_fibonacci) <= 0:
+            vet_fibonacci += 0
+            vet_fibonacci += 1
+        else:
+            vet_fibonacci = vet_fibonacci[i-1] + vet_fibonacci[i]
+    print(vet_fibonacci)
 
-#         ....    
+print(fibonacci(10))
 
-#         ....    
-
-#         return vet
-
-#     
 
 # f. Converta números binários em decimais. Considere a entrada do binário em formato texto. (Dica: É similar a soma dos opostos de um vetor)
 
 #         "1011" -> $1x2^3 + 0x2^2 + 1x2^1 + 1x2^0=  11$
 
 #         "10101" -> $1x2^4 + 0x2^3 + 1x2^2 + 0x2^1 + 1x2^0 = 21$
+
 
 
 
