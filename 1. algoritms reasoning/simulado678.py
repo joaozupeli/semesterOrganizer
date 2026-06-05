@@ -271,3 +271,23 @@ print(fibonacci(10))
 #     
 
 # **OBS**: Para os casos de implementação, reveja também as listas de exercícios.
+
+
+
+
+novo_registro = [230, 20, 5, 430]
+
+base_registro = [200, 25, 5, 400, 'P2']
+
+def distancia(novo, base):
+    soma = 0
+    for i in range(len(novo)):
+            soma += (novo[i] - base[i]) ** 2
+            raiz = soma ** 0.5 
+
+    return raiz
+
+print(distancia(novo_registro,base_registro))
+
+
+
