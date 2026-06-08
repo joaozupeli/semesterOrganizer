@@ -38,8 +38,16 @@ def calcular_min_max(base):
 
     for coluna in range(num_atributos):
         valores = [linha[coluna] for linha in base]
-        minimos.append(min(valores))
-        maximos.append(max(valores))
+        menor_valor = float("inf")
+        maior_valor = float("-inf")
+        for valor in valores:
+            if valor < menor_valor:
+                menor_valor = valor
+            elif valor > maior_valor:
+                maior_valor = valor
+        minimos.append(menor_valor)
+        maximos.append(maior_valor)
+
     return minimos, maximos
 
 def normalizar(registro, minimos, maximos):
@@ -55,7 +63,7 @@ def normalizar(registro, minimos, maximos):
 
 
 def classificar(novos_registros, base):
-    menor_distancia = None
+    menor_distancia = float("inf")
     perfil_mais_proximo = None
 
     for registro in base:
