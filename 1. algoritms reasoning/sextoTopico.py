@@ -51,53 +51,142 @@
 # print(vetor)
 
 # 5. Para cada posição [i] do vetor, imprima o valor atual, seu antecessor e sucessor
-vetor = [1,2,3,4,5,6]
+# vetor = [1,2,3,4,5,6]
 
-for i in range(0, len(vetor)-1):
-  print(vetor[i])
-  print(vetor[i-1])
-  print(vetor[i+1])
+# for i in range(0, len(vetor)-1):
+#   print(f"Posição {i}: {vetor[i]}, Antecessor: {vetor[i-1]}, Sucessor: {vetor[i+1]}")
 
 
 # 6. Apresente a soma dos elementos opostos de um vetor de 100 elementos
 
+# vetor = [1,2,3,4,5,6,7,8,9,10]
+# soma = 0
+# for i in range(0, len(vetor)):
+#   soma += vetor[i]
+# print(soma)
+
 # 7. Compute a média e o desvio padrão de um vetor
+# vetor = [1,2,3,4,5,6,7,8,9,10]
+# media = 0
+# for i in range(0, len(vetor)):
+#   media += vetor[i]
+# media = media / len(vetor)
+# print(media)
+
+# desvio = 0
+# for i in range(0, len(vetor)):
+#   desvio += (vetor[i] - media) ** 2
+# desvio = (desvio / len(vetor)) ** 0.5
+# print(desvio)
+
 
 # 8. Crie um vetor aleatorio. Posteriormente apresente a soma dos pares e depois dos múltiplos de 5. Também, crie um vetor com os múltiplos de 10 do vetor original.
 
+# vetor = [1,2,3,4,5,6,7,8,9,10]
+# soma_pares = 0
+# soma_multiplos_5 = 0
+# vetor_multiplos_10 = []
+# for i in range(0, len(vetor)):
+#   if vetor[i] % 2 == 0:
+#     soma_pares += vetor[i]
+#   if vetor[i] % 5 == 0:
+#     soma_multiplos_5 += vetor[i]
+#   if vetor[i] % 10 == 0:
+#     vetor_multiplos_10.append(vetor[i])
+# print(soma_pares)
+# print(soma_multiplos_5)
+# print(vetor_multiplos_10)
+
+
 # 9. Crie dois vetores de 5 elementos cada, e posteriormente crie um terceiro resultante da soma deste dois
+
+# vetor1 = [1,2,3,4,5]
+# vetor2 = [6,7,8,9,10]
+# vetor3 = []
+# for i in range(0, len(vetor1)):
+#   vetor3.append(vetor1[i] + vetor2[i])
+# print(vetor3)
 
 # 10. Dado um vetor de 20 elementos, divida este em dois sub-vetores de 10 elementos
 
+# vetor = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+# vetor1 = vetor[:10]
+# vetor2 = vetor[10:]
+# print(vetor1)
+# print(vetor2)
+
 # 11. Encontre o maior elemento de um vetor
+
+# vetor = [1,2,3,4,5,6,7,8,9,10]
+# maior = vetor[0]
+# for i in range(0, len(vetor)):
+#   if vetor[i] > maior:
+#     maior = vetor[i]
+# print(maior)
 
 # 12. Encontre os dois maiores elementos de um vetor
 
+# vetor = [1,2,3,4,5,6,7,8,9,10]
+# maior1 = vetor[0]
+# maior2 = vetor[0]
+# for i in range(0, len(vetor)):
+#   if vetor[i] > maior1:
+#     maior1 = vetor[i]
+#   if vetor[i] > maior2 and vetor[i] != maior1:
+#     maior2 = vetor[i]
+# print(maior1)
+# print(maior2)
+
+# vetor = [30,10,40,50,20]
+# media = sum(vetor) / len(vetor)
+# vetor_rotulado = []
+# for i in range(0, len(vetor)):
+#   if vetor[i] > media:
+#     vetor_rotulado.append(1)
+#   else:
+#     vetor_rotulado.append(-1)
+# print(vetor_rotulado)
+
 # 13. Dado um vetor, crie um segundo vetor rotulando os indices do primeiro que contem valores acima (-1) e abaixo da média (-1):
 
-#     Ex: [30,10,40,50,20] --> média 30 -> [0,-1,1,1,-1]
+# vetor = [30,10,40,50,20]
+# media = sum(vetor) / len(vetor)
+# vetor_rotulado = []
+# for i in range(0, len(vetor)):
+#   if vetor[i] > media:
+#     vetor_rotulado.append(1)
+#   else:
+#     vetor_rotulado.append(-1)
+# print(vetor_rotulado)
 
 # 14. Dado um vetor de 20 elementos, imprima o vetor como se fosse uma piramide:
 
-#     vet = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+# vetor = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+# for i in range(0, len(vetor)):
+#   print(vetor[:i+1])
 
-#     1
-
-#     12
-
-#     123
-
-#     1234
-
-#     .....
-
-#     12345.......181920
 
 # 15. Imprima na ordem inversa o exercício 14.
 
+# vetor = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+# for i in range(len(vetor)-1, -1, -1):
+#   print(vetor[:i+1])
+
 # 16. Contrua e descontrua a pirâmide (dos exercícios 14 e 15)
 
+# vetor = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+# for i in range(0, len(vetor)):
+#   print(vetor[:i+1])
+# for i in range(len(vetor)-1, -1, -1):
+#   print(vetor[:i+1])
+
 # 17. Dado um vetor qualquer, apresente os elementos em forma de 'X'.
+
+vetor = [5,2,1,3,4]
+for i in range(0, len(vetor)):
+  print(vetor[i], end=" ")
+for i in range(len(vetor)-1, -1, -1):
+  print(vetor[i], end=" ")
 
 # 18. Dado um vetor qualquer , apresente este vetor de forma ordenada
 

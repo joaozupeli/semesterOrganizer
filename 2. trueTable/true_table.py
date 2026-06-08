@@ -1,92 +1,103 @@
-from itertools import product
-
-# Prioridade dos conectivos (quanto maior, resolve primeiro)
-PRIORIDADE = {
-    '(': -1,
-    '<->': 0,
-    '->': 1,
-    'or': 2,
-    'and': 3,
-    'XOR': 3,
-    'not': 4,
-}
+def remover_parentese_externo(txt):
+    txt = txt.replace('(', ' ( ').replace(')', ' ) ')
+    return txt.split()
 
 
-def calcular(op, b, a=None):
-    if op == 'not': return not b
-    if op == 'and': return a and b
-    if op == 'or':  return a or b
-    if op == '->':  return (not a) or b
-    if op == 'XOR': return a != b
-    if op == '<->': return a == b
+def operador_principal(partes):
+    peso = {'<->': 0, '->': 1, 'or': 2, 'and': 3, 'XOR': 3, 'not': 4}
+    nivel = 0
+    melhor = -1
+    melhor_peso = 999
+    pos_not = -1
+
+    for i in range(len(partes)):
+        if partes[i] == '(':
+            nivel += 1
+        elif partes[i] == ')':
+            nivel -= 1
+        elif nivel == 0 and partes[i] in peso:
+            if partes[i] == 'not':
+                if pos_not == -1:
+                    pos_not = i
+            elif peso[partes[i]] <= melhor_peso:
+                melhor = i
+                melhor_peso = peso[partes[i]]
+
+    if melhor != -1:
+        return melhor
+    return pos_not
 
 
-def para_posfixo(formula):
-    """Converte 'A and B' para ['A', 'B', 'and'] (notação posfixa)."""
-    tokens = formula.replace('(', ' ( ').replace(')', ' ) ').split()
-    pilha = []
-    saida = []
-
-    for t in tokens:
-        if t.isupper() and t not in PRIORIDADE:
-            saida.append(t)
-        elif t == '(':
-            pilha.append(t)
-        elif t == ')':
-            while pilha[-1] != '(':
-                saida.append(pilha.pop())
-            pilha.pop()
+def tirar_parenteses(p):
+    while p[0] == '(' and p[-1] == ')':
+        nivel = 0
+        pode = True
+        for i in range(len(p)):
+            if p[i] == '(':
+                nivel += 1
+            elif p[i] == ')':
+                nivel -= 1
+            if nivel == 0 and i < len(p) - 1:
+                pode = False
+                break
+        if pode:
+            p = p[1:-1]
         else:
-            while pilha and PRIORIDADE.get(pilha[-1], -1) >= PRIORIDADE[t]:
-                saida.append(pilha.pop())
-            pilha.append(t)
-
-    while pilha:
-        saida.append(pilha.pop())
-
-    return saida
+            break
+    return p
 
 
-def avaliar(posfixo, valores):
-    """Resolve a expressão posfixa usando os valores V/F das variáveis."""
-    pilha = []
+def calcular(partes, vals):
+    partes = tirar_parenteses(partes)
 
-    for t in posfixo:
-        if t in valores:
-            pilha.append(valores[t])
-        elif t == 'not':
-            pilha.append(calcular('not', pilha.pop()))
-        else:
-            b = pilha.pop()
-            a = pilha.pop()
-            pilha.append(calcular(t, b, a))
+    if len(partes) == 1:
+        return vals[partes[0]]
 
-    return pilha[0]
+    pos = operador_principal(partes)
+    op = partes[pos]
+    dir = partes[pos + 1:]
+
+    if op == 'not':
+        return not calcular(dir, vals)
+
+    esq = partes[:pos]
+    e = calcular(esq, vals)
+    d = calcular(dir, vals)
+
+    if op == 'and':
+        return e and d
+    if op == 'or':
+        return e or d
+    if op == '->':
+        return (not e) or d
+    if op == 'XOR':
+        return e != d
+    if op == '<->':
+        return e == d
 
 
-def tabela_verdade():
-    print("\nConectivos: not | and | or | -> | XOR | <->")
-    print("Exemplo:    ( A and B ) -> C\n")
-    formula = input("Fórmula: ")
+def rodar():
+    print("\nOperadores: not | and | or | -> | XOR | <->")
+    formula = input("Formula: ")
 
-    letras = sorted(set(c for c in formula if c.isupper() and c not in ('X', 'O', 'R')))
-    posfixo = para_posfixo(formula)
+    partes = remover_parentese_externo(formula)
+    vars = sorted(set(p for p in partes if len(p) == 1 and p.isupper()))
 
-    # Cabeçalho
-    cabecalho = " | ".join(letras) + " | RESULTADO"
-    print("\n" + cabecalho)
-    print("-" * len(cabecalho))
+    n = len(vars)
+    total = 2 ** n
 
-    # Gera todas as combinações de V e F
-    for combo in product([True, False], repeat=len(letras)):
-        valores = dict(zip(letras, combo))
-        resultado = avaliar(posfixo, valores)
+    print()
+    for i in range(total):
+        vals = {}
+        bits = bin(i)[2:].zfill(n)
+        for j in range(n):
+            vals[vars[j]] = bits[j] == '0'
 
-        linha = " | ".join("V" if valores[l] else "F" for l in letras)
-        print(f"{linha} | {'V' if resultado else 'F'}")
+        r = calcular(partes[:], vals)
+        print("V" if r else "F")
 
 
 while True:
-    tabela_verdade()
+    rodar()
     if input("\nOutra? (s/n): ") != 's':
         break
