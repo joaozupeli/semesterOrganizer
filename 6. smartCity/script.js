@@ -1,39 +1,118 @@
-/* =======================================================================
-   CONFIGURAÇÃO MQTT (para receber dados reais do ESP-32 no Wokwi)
-   -----------------------------------------------------------------------
-   Como funciona:
-   - O ESP-32 publica o nível de água (0 a 100) em um tópico MQTT.
-   - Esta página se inscreve nesse tópico e atualiza os bueiros em tempo real.
-   - Tópico por bueiro: smartcity/bueiro/1, smartcity/bueiro/2, smartcity/bueiro/3
-   - Payload esperado: apenas o número do nível, ex: "75"
-   Troque o broker/tópico abaixo conforme o seu projeto.
-   ======================================================================= */
-const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt"; // broker público de teste
-const MQTT_TOPICO_BASE = "smartcity/bueiro"; // .../1 .../2 .../3
+const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
+const MQTT_TOPICO_BASE = "smartcity/bueiro";
 
-// Acima deste nível o bueiro mostra o alerta amarelo "!" no mapa.
 const LIMITE_ATENCAO = 50;
+const LIMITE_PERIGO = 80;
 
-// Nível de cada bueiro (0 a 100). Começa em 0.
 const niveis = { 1: 0, 2: 0, 3: 0 };
 
-let bueiroSelecionado = null; // id do bueiro aberto no popup
+const niveisPrev = { 1: 0, 2: 0, 3: 0 };
 
-/* ----------------- ESCALA DA CIDADE (preencher a tela) ----------------- */
-// A cidade tem tamanho-base 560x560. Aqui calculamos um "scale" para que ela
-// ocupe o máximo possível do espaço disponível, mantendo-se quadrada.
+let bueiroSelecionado = null;
+
+const estiloExtra = document.createElement("style");
+estiloExtra.textContent = `
+  .bueiro.perigo .alerta-icone {
+    display: block;
+    background: #e53935;
+    color: #fff;
+    animation: pulsar 0.5s infinite;
+  }
+
+  .lista-item .ponto.perigo { background: #e53935; }
+
+  .badge-status {
+    display: block;
+    margin: 0 0 14px;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  .badge-status.normal  { background: #43a047; color: #fff; }
+  .badge-status.atencao { background: #f2c94c; color: #1c1c24; }
+  .badge-status.perigo  {
+    background: #e53935;
+    color: #fff;
+    animation: piscarBadge 0.8s infinite;
+  }
+  @keyframes piscarBadge {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+`;
+document.head.appendChild(estiloExtra);
+
+const badgeStatus = document.createElement("span");
+badgeStatus.className = "badge-status normal";
+badgeStatus.textContent = "Nível Normal";
+const popupEl = document.querySelector(".popup");
+popupEl.insertBefore(badgeStatus, popupEl.firstChild);
+
+const bannerAlerta = document.createElement("div");
+bannerAlerta.style.cssText =
+  "position:fixed; top:0; left:0; width:100%;" +
+  "background:rgba(220,38,38,0.92); color:#fff;" +
+  "padding:12px 24px; font-weight:bold; text-align:center;" +
+  "z-index:9999; transition:opacity 0.5s; opacity:0; display:none;";
+document.body.appendChild(bannerAlerta);
+let timerBanner = null;
+
+const SOM_ATENCAO = { frequencia: 620, duracao: 0.15, vezes: 2, intervalo: 0.2 };
+const SOM_PERIGO  = { frequencia: 960, duracao: 0.10, vezes: 3, intervalo: 0.15 };
+
+let audioCtx = null;
+
+function obterAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+function criarSom(frequencia, duracao, vezes, intervalo) {
+  try {
+    const ctx = obterAudioContext();
+    for (let i = 0; i < vezes; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = frequencia;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const inicio = ctx.currentTime + i * intervalo;
+      gain.gain.setValueAtTime(0.2, inicio);
+      gain.gain.exponentialRampToValueAtTime(0.001, inicio + duracao);
+      osc.start(inicio);
+      osc.stop(inicio + duracao);
+    }
+  } catch (e) {
+  }
+}
+
+function verificarSom(id, valor) {
+  const anterior = niveisPrev[id];
+  if (anterior < LIMITE_PERIGO && valor >= LIMITE_PERIGO) {
+    criarSom(SOM_PERIGO.frequencia, SOM_PERIGO.duracao, SOM_PERIGO.vezes, SOM_PERIGO.intervalo);
+  } else if (anterior < LIMITE_ATENCAO && valor >= LIMITE_ATENCAO) {
+    criarSom(SOM_ATENCAO.frequencia, SOM_ATENCAO.duracao, SOM_ATENCAO.vezes, SOM_ATENCAO.intervalo);
+  }
+  niveisPrev[id] = valor;
+}
+
 const CIDADE_BASE = 700;
 const cidadeEl = document.getElementById("cidade");
 const cidadeWrapper = document.getElementById("cidadeWrapper");
 
 function ajustarEscalaCidade() {
-  const espacoPainel = 320 + 40; // largura do painel + gap entre eles
-  const margem = 60;             // respiro nas bordas
-  const disponivelLargura = window.innerWidth - espacoPainel - margem;
-  const disponivelAltura = window.innerHeight - 150; // desconta título/padding
+  const margem = 80;
+  const disponivelLargura = (window.innerWidth - margem) / 2;
+  const disponivelAltura = window.innerHeight - 150;
 
   let escala = Math.min(disponivelLargura / CIDADE_BASE, disponivelAltura / CIDADE_BASE);
-  escala = Math.max(0.5, escala); // nunca menor que isso
+  escala = Math.max(0.5, escala);
 
   cidadeEl.style.transform = "scale(" + escala + ")";
   cidadeWrapper.style.width = CIDADE_BASE * escala + "px";
@@ -43,20 +122,24 @@ function ajustarEscalaCidade() {
 window.addEventListener("resize", ajustarEscalaCidade);
 ajustarEscalaCidade();
 
-/* ----------------- ATUALIZAÇÃO VISUAL ----------------- */
 function atualizarBueiro(id, valor) {
   valor = Math.max(0, Math.min(100, Math.round(valor)));
+
+  verificarSom(id, valor);
   niveis[id] = valor;
 
   const el = document.querySelector('.bueiro[data-id="' + id + '"]');
   if (el) {
-    el.classList.toggle("cheio", valor > 0);               // anel azul quando tem água
-    el.classList.toggle("atencao", valor >= LIMITE_ATENCAO); // "!" amarelo de 50% pra cima
+    el.classList.toggle("cheio", valor > 0);
+    el.classList.toggle("atencao", valor >= LIMITE_ATENCAO && valor < LIMITE_PERIGO);
+    el.classList.toggle("perigo", valor >= LIMITE_PERIGO);
+    el.querySelector(".alerta-icone").textContent =
+      valor >= LIMITE_PERIGO ? "!!" : "!";
   }
 
   atualizarListaPainel(id, valor);
+  atualizarBanner();
 
-  // se o popup deste bueiro estiver aberto, atualiza em tempo real
   if (bueiroSelecionado === id) renderizarPopup(id);
 }
 
@@ -64,9 +147,39 @@ function atualizarListaPainel(id, valor) {
   const item = document.querySelector('.lista-item[data-id="' + id + '"]');
   if (!item) return;
   item.querySelector(".valor").textContent = valor + "%";
+
   const ponto = item.querySelector(".ponto");
-  ponto.classList.toggle("cheio", valor > 0 && valor < LIMITE_ATENCAO);
-  ponto.classList.toggle("atencao", valor >= LIMITE_ATENCAO);
+  ponto.classList.remove("cheio", "atencao", "perigo");
+  if (valor >= LIMITE_PERIGO) {
+    ponto.classList.add("perigo");
+  } else if (valor >= LIMITE_ATENCAO) {
+    ponto.classList.add("atencao");
+  }
+}
+
+function atualizarBanner() {
+  let pior = null;
+  [1, 2, 3].forEach(function (id) {
+    if (niveis[id] >= LIMITE_PERIGO && (pior === null || niveis[id] > niveis[pior])) {
+      pior = id;
+    }
+  });
+
+  if (pior !== null) {
+    clearTimeout(timerBanner);
+    bannerAlerta.textContent =
+      "⚠️ ALERTA: Bueiro " + pior + " em nível crítico! Risco de alagamento.";
+    bannerAlerta.style.display = "block";
+    requestAnimationFrame(function () {
+      bannerAlerta.style.opacity = "1";
+    });
+  } else if (bannerAlerta.style.display === "block") {
+    bannerAlerta.style.opacity = "0";
+    clearTimeout(timerBanner);
+    timerBanner = setTimeout(function () {
+      bannerAlerta.style.display = "none";
+    }, 500);
+  }
 }
 
 function renderizarPopup(id) {
@@ -75,12 +188,19 @@ function renderizarPopup(id) {
   document.getElementById("popupNivel").textContent = valor + "%";
   document.getElementById("popupAgua").style.height = valor + "%";
 
-  // posiciona a knob horizontal de acordo com o nível
-  document.getElementById("knobPreenchido").style.width = valor + "%";
-  document.getElementById("knobPuxador").style.left = valor + "%";
+  if (valor >= LIMITE_PERIGO) {
+    badgeStatus.className = "badge-status perigo";
+    badgeStatus.textContent = "PERIGO: Risco de alagamento!";
+  } else if (valor >= LIMITE_ATENCAO) {
+    badgeStatus.className = "badge-status atencao";
+    badgeStatus.textContent = "Atenção: Bueiro sobrecarregado";
+  } else {
+    badgeStatus.className = "badge-status normal";
+    badgeStatus.textContent = "Nível Normal";
+  }
 
   const alerta = document.getElementById("popupAlerta");
-  if (valor >= 80) {
+  if (valor >= LIMITE_PERIGO) {
     alerta.className = "alerta perigo";
     alerta.textContent = "Risco de alagamento! Nível crítico.";
   } else if (valor <= 30) {
@@ -92,7 +212,6 @@ function renderizarPopup(id) {
   }
 }
 
-/* ----------------- POPUP (abrir/fechar) ----------------- */
 document.querySelectorAll(".bueiro").forEach(function (b) {
   b.addEventListener("click", function () {
     bueiroSelecionado = parseInt(b.dataset.id, 10);
@@ -110,44 +229,35 @@ function fecharPopup() {
   bueiroSelecionado = null;
 }
 
-/* ----------------- KNOB HORIZONTAL (controla só o bueiro aberto) ----------------- */
-const knobH = document.getElementById("knobH");
-let arrastandoKnob = false;
+document.getElementById("knobH").style.display = "none";
+const knobDica = document.querySelector(".knob-dica");
+if (knobDica) knobDica.style.display = "none";
 
-function setNivelPelaPosicao(clientX) {
-  if (bueiroSelecionado === null) return;
-  const rect = knobH.getBoundingClientRect();
-  let pct = ((clientX - rect.left) / rect.width) * 100;
-  pct = Math.max(0, Math.min(100, pct));
-  atualizarBueiro(bueiroSelecionado, pct);
-}
-
-knobH.addEventListener("pointerdown", function (e) {
-  arrastandoKnob = true;
-  knobH.setPointerCapture(e.pointerId);
-  setNivelPelaPosicao(e.clientX);
-});
-knobH.addEventListener("pointermove", function (e) {
-  if (arrastandoKnob) setNivelPelaPosicao(e.clientX);
-});
-knobH.addEventListener("pointerup", function () { arrastandoKnob = false; });
-knobH.addEventListener("pointercancel", function () { arrastandoKnob = false; });
-
-/* ----------------- CONEXÃO MQTT (ESP-32) ----------------- */
 const bolinha = document.getElementById("bolinhaStatus");
 const textoStatus = document.getElementById("textoStatus");
 
+function statusConectado() {
+  bolinha.classList.add("online");
+  textoStatus.textContent = "Conectado ao ESP32";
+}
+
+function statusDesconectado() {
+  bolinha.classList.remove("online");
+  textoStatus.textContent = "Desconectado";
+}
+
 try {
-  const client = mqtt.connect(MQTT_BROKER);
+  const client = mqtt.connect(MQTT_BROKER, {
+    clientId: "html-smartcity-" + Math.random().toString(16).slice(2, 10),
+    reconnectPeriod: 5000,
+  });
 
   client.on("connect", function () {
-    bolinha.classList.add("online");
-    textoStatus.textContent = "ESP-32: conectado (recebendo sensor)";
+    statusConectado();
     client.subscribe(MQTT_TOPICO_BASE + "/+");
   });
 
   client.on("message", function (topico, mensagem) {
-    // topico ex: smartcity/bueiro/2  | mensagem ex: "75"
     const partes = topico.split("/");
     const id = parseInt(partes[partes.length - 1], 10);
     const valor = parseFloat(mensagem.toString());
@@ -156,15 +266,9 @@ try {
     }
   });
 
-  client.on("error", function () {
-    bolinha.classList.remove("online");
-    textoStatus.textContent = "ESP-32: erro de conexão (modo manual)";
-  });
-
-  client.on("close", function () {
-    bolinha.classList.remove("online");
-    textoStatus.textContent = "ESP-32: desconectado (modo manual)";
-  });
+  client.on("error", statusDesconectado);
+  client.on("close", statusDesconectado);
+  client.on("offline", statusDesconectado);
 } catch (e) {
-  textoStatus.textContent = "ESP-32: MQTT indisponível (modo manual)";
+  statusDesconectado();
 }

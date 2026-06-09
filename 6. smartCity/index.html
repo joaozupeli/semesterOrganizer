@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart City - Monitor de Bueiros</title>
 
-  <!-- Biblioteca MQTT para receber dados reais do ESP-32 (Wokwi) -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
   <style>
@@ -54,19 +53,24 @@
       width: 100%;
       min-height: 0;
       display: flex;
-      gap: 40px;
+      gap: 24px;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
     }
 
-    /* wrapper que reserva o espaço da cidade já escalada (tamanho definido via JS) */
+    .metade-mapa {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .cidade-wrapper {
       position: relative;
       flex-shrink: 0;
     }
 
-    /* ---------- CIDADE (vista de cima) ---------- */
-    /* Tamanho-base 700x700, escalada por JS (transform) para preencher a tela */
     .cidade {
       position: absolute;
       top: 0;
@@ -84,13 +88,12 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    /* ---------- RUAS (avenidas largas com calçada bege) ---------- */
     .rua {
       position: absolute;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.12)),
         var(--asfalto);
-      box-shadow: 0 0 0 14px var(--calcada); /* calçada bege em volta */
+      box-shadow: 0 0 0 14px var(--calcada);
     }
     .rua.horizontal {
       left: 0;
@@ -102,7 +105,6 @@
       height: 100%;
       width: 100px;
     }
-    /* Faixa central tracejada amarela */
     .rua.horizontal::after {
       content: "";
       position: absolute;
@@ -124,7 +126,6 @@
       background: repeating-linear-gradient(to bottom, var(--rua-linha) 0 22px, transparent 22px 44px);
     }
 
-    /* Faixa de pedestre (zebra) */
     .faixa-pedestre { position: absolute; }
     .faixa-pedestre.horizontal {
       height: 24px;
@@ -135,7 +136,6 @@
       background: repeating-linear-gradient(to bottom, #fff 0 8px, transparent 8px 18px);
     }
 
-    /* Seta direcional branca na pista */
     .seta {
       position: absolute;
       width: 0;
@@ -147,13 +147,11 @@
     .seta.cima  { border-bottom: 16px solid #fff; }
     .seta.baixo { border-top: 16px solid #fff; }
 
-    /* ---------- CASAS / PRÉDIOS (telhado visto de cima) ---------- */
     .casa {
       position: absolute;
       border-radius: 4px;
       box-shadow: 5px 7px 14px rgba(0,0,0,0.4);
     }
-    /* cumeeira (linha central mais clara do telhado) */
     .casa::after {
       content: "";
       position: absolute;
@@ -161,13 +159,11 @@
       border-radius: 4px;
       background: linear-gradient(to bottom, transparent 46%, rgba(255,255,255,0.25) 49% 51%, transparent 54%);
     }
-    /* telhados de 4 águas usando conic-gradient (tons alternados) */
     .telha-laranja  { background: conic-gradient(from 45deg, #f07b35 0 90deg, #cf5a1c 90deg 180deg, #f07b35 180deg 270deg, #cf5a1c 270deg); }
     .telha-vermelha { background: conic-gradient(from 45deg, #e0532e 0 90deg, #b23a1a 90deg 180deg, #e0532e 180deg 270deg, #b23a1a 270deg); }
     .telha-azul     { background: conic-gradient(from 45deg, #5aa9e6 0 90deg, #3f7fbd 90deg 180deg, #5aa9e6 180deg 270deg, #3f7fbd 270deg); }
     .telha-cinza    { background: conic-gradient(from 45deg, #d7dde2 0 90deg, #b4bcc4 90deg 180deg, #d7dde2 180deg 270deg, #b4bcc4 270deg); }
 
-    /* Praça / calçadão bege texturizado */
     .praca {
       position: absolute;
       background:
@@ -179,7 +175,6 @@
       box-shadow: inset 0 0 0 2px rgba(0,0,0,0.06);
     }
 
-    /* Árvores frondosas */
     .arvore {
       position: absolute;
       width: 42px;
@@ -190,7 +185,6 @@
     }
     .arvore.pequena { width: 30px; height: 30px; }
 
-    /* lago decorativo */
     .lago {
       position: absolute;
       background: radial-gradient(circle at 38% 32%, #6fd0f5, #1976d2);
@@ -198,7 +192,6 @@
       box-shadow: inset 0 0 10px rgba(0,0,0,0.35), 0 0 0 5px #5e9646;
     }
 
-    /* canteiro ajardinado (ilhas verdes do cruzamento) */
     .canteiro {
       position: absolute;
       background: radial-gradient(circle at 40% 35%, #7cb95f, #4f8a36);
@@ -206,7 +199,6 @@
       box-shadow: inset 0 0 0 3px rgba(255,255,255,0.12), 2px 3px 6px rgba(0,0,0,0.4);
     }
 
-    /* Guarda-sol (vermelho/branco) */
     .guarda-sol {
       position: absolute;
       width: 26px;
@@ -216,7 +208,6 @@
       box-shadow: 0 3px 7px rgba(0,0,0,0.45);
     }
 
-    /* Carros decorativos */
     .carro {
       position: absolute;
       border-radius: 4px;
@@ -233,7 +224,6 @@
       border-radius: 2px;
     }
 
-    /* ---------- BUEIROS ---------- */
     .bueiro {
       position: absolute;
       width: 34px;
@@ -245,7 +235,6 @@
       transition: transform 0.15s, box-shadow 0.15s;
       z-index: 5;
     }
-    /* desenho da tampa de bueiro (linhas) */
     .bueiro::before {
       content: "";
       position: absolute;
@@ -260,7 +249,6 @@
       transform: scale(1.15);
       box-shadow: 0 0 0 4px rgba(33,150,243,0.5);
     }
-    /* anel colorido que reflete o nível de água (atualizado via JS) */
     .bueiro .anel-nivel {
       position: absolute;
       inset: -6px;
@@ -283,7 +271,6 @@
       white-space: nowrap;
     }
 
-    /* ícone de exclamação amarelo (aparece quando o nível passa de 50%) */
     .bueiro .alerta-icone {
       position: absolute;
       top: -42px;
@@ -310,14 +297,43 @@
       50%      { transform: translateX(-50%) scale(1.25); }
     }
 
-    /* ---------- PAINEL LATERAL (status + legenda) ---------- */
     .painel {
-      width: 320px;
-      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
       background: #26262f;
       border-radius: 12px;
       padding: 28px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+
+    .wokwi-secao {
+      margin-top: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .wokwi-secao h2 { margin-bottom: 10px; }
+    .wokwi-box {
+      --corte-topo: 48px;
+      --corte-esquerda: 100%;
+      position: relative;
+      flex: 1;
+      min-height: 220px;
+      background: #1c1c24;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .wokwi-box iframe {
+      position: absolute;
+      top: calc(-1 * var(--corte-topo));
+      left: calc(-1 * var(--corte-esquerda));
+      width: calc(100% + var(--corte-esquerda));
+      height: calc(100% + var(--corte-topo));
+      border: 0;
     }
 
     .painel h2 {
@@ -326,7 +342,6 @@
       color: #cfd2d8;
     }
 
-    /* Lista com o nível atual de cada bueiro */
     .lista-niveis { margin: 18px 0; }
     .lista-item {
       display: flex;
@@ -350,7 +365,6 @@
     .lista-item .nome { flex: 1; }
     .lista-item .valor { font-weight: bold; color: var(--agua); }
 
-    /* Legenda */
     .legenda { font-size: 13px; color: #9aa0a9; }
     .legenda-item {
       display: flex;
@@ -371,7 +385,6 @@
       flex-shrink: 0;
     }
 
-    /* ---------- KNOB HORIZONTAL (dentro do popup) ---------- */
     .knob-h {
       position: relative;
       width: 240px;
@@ -398,7 +411,6 @@
       width: 0%;
       background: linear-gradient(to right, #1976d2, var(--agua));
     }
-    /* "cap" da knob que desliza na horizontal */
     .knob-puxador {
       position: absolute;
       top: 50%;
@@ -420,7 +432,6 @@
       text-align: center;
     }
 
-    /* Status de conexão MQTT */
     .status-conexao {
       display: flex;
       align-items: center;
@@ -439,7 +450,6 @@
     }
     .bolinha.online { background: #43a047; }
 
-    /* ---------- POPUP DO BUEIRO ---------- */
     .overlay {
       position: fixed;
       inset: 0;
@@ -462,7 +472,6 @@
     .popup h3 { margin-bottom: 4px; }
     .popup .popup-sub { color: #9aa0a9; font-size: 13px; margin-bottom: 18px; }
 
-    /* Desenho do bueiro de lado (poço enchendo) */
     .poco {
       position: relative;
       width: 90px;
@@ -482,7 +491,6 @@
       background: linear-gradient(to top, #0d47a1, var(--agua));
       transition: height 0.4s ease;
     }
-    /* "ondas" no topo da água */
     .poco .agua::before {
       content: "";
       position: absolute;
@@ -546,14 +554,12 @@
   <p class="subtitulo">Clique em um bueiro para ver o nível e ajustar com a knob. Acima de 50% aparece um alerta no mapa.</p>
 
   <div class="layout">
-    <!-- ===================== MAQUETE DA CIDADE ===================== -->
+    <div class="metade-mapa">
     <div class="cidade-wrapper" id="cidadeWrapper">
     <div class="cidade" id="cidade">
-      <!-- ===== AVENIDAS (cruz central larga) ===== -->
       <div class="rua horizontal" style="top: 300px;"></div>
       <div class="rua vertical"   style="left: 300px;"></div>
 
-      <!-- ============ QUADRANTE SUPERIOR ESQUERDO ============ -->
       <div class="casa telha-laranja"  style="top: 20px;  left: 22px;  width: 92px;  height: 80px;"></div>
       <div class="casa telha-cinza"    style="top: 20px;  left: 150px; width: 120px; height: 90px;"></div>
       <div class="praca"               style="top: 130px; left: 150px; width: 120px; height: 70px;"></div>
@@ -561,7 +567,6 @@
       <div class="guarda-sol" style="top: 148px; left: 218px;"></div>
       <div class="casa telha-vermelha" style="top: 214px; left: 22px;  width: 110px; height: 70px;"></div>
 
-      <!-- ============ QUADRANTE SUPERIOR DIREITO ============ -->
       <div class="casa telha-vermelha" style="top: 20px;  left: 420px; width: 100px; height: 80px;"></div>
       <div class="casa telha-azul"     style="top: 20px;  left: 560px; width: 120px; height: 96px;"></div>
       <div class="casa telha-laranja"  style="top: 120px; left: 420px; width: 96px;  height: 60px;"></div>
@@ -570,14 +575,12 @@
       <div class="guarda-sol" style="top: 214px; left: 438px;"></div>
       <div class="guarda-sol" style="top: 214px; left: 488px;"></div>
 
-      <!-- ============ QUADRANTE INFERIOR ESQUERDO ============ -->
       <div class="casa telha-cinza"    style="top: 420px; left: 22px;  width: 110px; height: 80px;"></div>
       <div class="casa telha-azul"     style="top: 420px; left: 160px; width: 110px; height: 96px;"></div>
       <div class="casa telha-vermelha" style="top: 560px; left: 22px;  width: 90px;  height: 80px;"></div>
       <div class="casa telha-laranja"  style="top: 560px; left: 160px; width: 110px; height: 80px;"></div>
       <div class="praca"               style="top: 520px; left: 22px;  width: 120px; height: 30px;"></div>
 
-      <!-- ============ QUADRANTE INFERIOR DIREITO ============ -->
       <div class="casa telha-cinza"    style="top: 420px; left: 470px; width: 130px; height: 70px;"></div>
       <div class="casa telha-azul"     style="top: 420px; left: 620px; width: 64px;  height: 70px;"></div>
       <div class="casa telha-vermelha" style="top: 520px; left: 560px; width: 120px; height: 96px;"></div>
@@ -586,7 +589,6 @@
       <div class="guarda-sol" style="top: 636px; left: 438px;"></div>
       <div class="guarda-sol" style="top: 636px; left: 488px;"></div>
 
-      <!-- ===== 3 BUEIROS (clicáveis, sobre as avenidas) ===== -->
       <div class="bueiro" data-id="1" style="top: 333px; left: 180px;">
         <span class="alerta-icone">!</span>
         <span class="bueiro-label">Bueiro 1</span>
@@ -604,8 +606,8 @@
       </div>
     </div>
     </div>
+    </div>
 
-    <!-- ===================== PAINEL DE STATUS ===================== -->
     <div class="painel">
       <h2>Status do Sistema</h2>
 
@@ -614,7 +616,13 @@
         <span id="textoStatus">ESP-32: desconectado (modo manual)</span>
       </div>
 
-      <!-- Nível atual de cada bueiro (atualizado em tempo real) -->
+      <div class="wokwi-secao">
+        <h2>Simulação ESP32 — Wokwi</h2>
+        <div class="wokwi-box">
+          <iframe id="wokwiFrame" src="https://wokwi.com/projects/466395478382888961" title="Simulação ESP32 no Wokwi" loading="lazy"></iframe>
+        </div>
+      </div>
+
       <div class="lista-niveis" id="listaNiveis">
         <div class="lista-item" data-id="1">
           <span class="ponto"></span>
@@ -643,7 +651,6 @@
     </div>
   </div>
 
-  <!-- ===================== POPUP ===================== -->
   <div class="overlay" id="overlay">
     <div class="popup">
       <h3 id="popupTitulo">Bueiro</h3>
@@ -657,7 +664,6 @@
       <div class="nivel-num" id="popupNivel">0%</div>
       <div class="alerta" id="popupAlerta"></div>
 
-      <!-- Knob horizontal que controla SOMENTE este bueiro -->
       <div class="knob-dica">Arraste para ajustar o nível deste bueiro</div>
       <div class="knob-h" id="knobH">
         <div class="knob-trilho">
