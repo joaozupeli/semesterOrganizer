@@ -1,4 +1,4 @@
-def remover_parentese_externo(txt):
+def separar_simbolos(txt):
     txt = txt.replace('(', ' ( ').replace(')', ' ) ')
     return txt.split()
 
@@ -80,20 +80,24 @@ def rodar():
     print("\nOperadores: not | and | or | -> | XOR | <->")
     formula = input("Formula: ")
 
-    partes = remover_parentese_externo(formula)
-    vars = sorted(set(p for p in partes if len(p) == 1 and p.isupper()))
+    partes = separar_simbolos(formula)
+    letras = sorted(set(p for p in partes if len(p) == 1 and p.isupper()))
 
-    n = len(vars)
-    total = 2 ** n
+    combinacoes = [[]]
+    for letra in letras:
+        novas = []
+        for c in combinacoes:
+            novas.append(c + [True])
+            novas.append(c + [False])
+        combinacoes = novas
 
     print()
-    for i in range(total):
+    for combinacao in combinacoes:
         vals = {}
-        bits = bin(i)[2:].zfill(n)
-        for j in range(n):
-            vals[vars[j]] = bits[j] == '0'
+        for j in range(len(letras)):
+            vals[letras[j]] = combinacao[j]
 
-        r = calcular(partes[:], vals)
+        r = calcular(partes, vals)
         print("V" if r else "F")
 
 
