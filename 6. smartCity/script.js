@@ -168,7 +168,7 @@ function atualizarBanner() {
   if (pior !== null) {
     clearTimeout(timerBanner);
     bannerAlerta.textContent =
-      "⚠️ ALERTA: Bueiro " + pior + " em nível crítico! Risco de alagamento.";
+      "⚠️ ALERTA: Bueiros em nível crítico! Risco de alagamento.";
     bannerAlerta.style.display = "block";
     requestAnimationFrame(function () {
       bannerAlerta.style.opacity = "1";
