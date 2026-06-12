@@ -1,107 +1,158 @@
-def separar_simbolos(txt):
-    txt = txt.replace('(', ' ( ').replace(')', ' ) ')
-    return txt.split()
+def separar_simbolos(texto_digitado):
+    texto_com_espacos = texto_digitado.replace('(', ' ( ')
+    texto_com_espacos = texto_com_espacos.replace(')', ' ) ')
+
+    lista_de_pedacos = texto_com_espacos.split()
+
+    return lista_de_pedacos
 
 
-def operador_principal(partes):
-    peso = {'<->': 0, '->': 1, 'or': 2, 'and': 3, 'XOR': 3, 'not': 4}
-    nivel = 0
-    melhor = -1
-    melhor_peso = 999
-    pos_not = -1
+def operador_principal(pedacos):
+    peso_dos_operadores = {
+        '<->': 0,
+        '->': 1,
+        'or': 2,
+        'and': 3,
+        'XOR': 3,
+        'not': 4,
+    }
 
-    for i in range(len(partes)):
-        if partes[i] == '(':
-            nivel += 1
-        elif partes[i] == ')':
-            nivel -= 1
-        elif nivel == 0 and partes[i] in peso:
-            if partes[i] == 'not':
-                if pos_not == -1:
-                    pos_not = i
-            elif peso[partes[i]] <= melhor_peso:
-                melhor = i
-                melhor_peso = peso[partes[i]]
+    nivel_de_parenteses = 0
 
-    if melhor != -1:
-        return melhor
-    return pos_not
+    posicao_do_melhor_operador = -1
+
+    peso_do_melhor_operador = 999
+
+    posicao_do_not = -1
+
+    for i in range(len(pedacos)):
+        pedaco_atual = pedacos[i]
+
+        if pedaco_atual == '(':
+            nivel_de_parenteses = nivel_de_parenteses + 1
+
+        elif pedaco_atual == ')':
+            nivel_de_parenteses = nivel_de_parenteses - 1
+
+        elif nivel_de_parenteses == 0 and pedaco_atual in peso_dos_operadores:
+
+            if pedaco_atual == 'not':
+                if posicao_do_not == -1:
+                    posicao_do_not = i
+            else:
+                peso_atual = peso_dos_operadores[pedaco_atual]
+
+                if peso_atual <= peso_do_melhor_operador:
+                    posicao_do_melhor_operador = i
+                    peso_do_melhor_operador = peso_atual
+
+    if posicao_do_melhor_operador != -1:
+        return posicao_do_melhor_operador
+
+    return posicao_do_not
 
 
-def tirar_parenteses(p):
-    while p[0] == '(' and p[-1] == ')':
-        nivel = 0
-        pode = True
-        for i in range(len(p)):
-            if p[i] == '(':
-                nivel += 1
-            elif p[i] == ')':
-                nivel -= 1
-            if nivel == 0 and i < len(p) - 1:
-                pode = False
+def tirar_parenteses(pedacos):
+    while pedacos[0] == '(' and pedacos[-1] == ')':
+        nivel_de_parenteses = 0
+        pode_remover = True
+
+        for i in range(len(pedacos)):
+            if pedacos[i] == '(':
+                nivel_de_parenteses = nivel_de_parenteses + 1
+            elif pedacos[i] == ')':
+                nivel_de_parenteses = nivel_de_parenteses - 1
+
+            if nivel_de_parenteses == 0 and i < len(pedacos) - 1:
+                pode_remover = False
                 break
-        if pode:
-            p = p[1:-1]
+
+        if pode_remover:
+            pedacos = pedacos[1:-1]
         else:
             break
-    return p
+
+    return pedacos
 
 
-def calcular(partes, vals):
-    partes = tirar_parenteses(partes)
+def calcular(pedacos, valores):
+    pedacos = tirar_parenteses(pedacos)
 
-    if len(partes) == 1:
-        return vals[partes[0]]
+    if len(pedacos) == 1:
+        letra = pedacos[0]
+        return valores[letra]
 
-    pos = operador_principal(partes)
-    op = partes[pos]
-    dir = partes[pos + 1:]
+    posicao_do_operador = operador_principal(pedacos)
+    operador = pedacos[posicao_do_operador]
 
-    if op == 'not':
-        return not calcular(dir, vals)
+    lado_direito_pedacos = pedacos[posicao_do_operador + 1:]
 
-    esq = partes[:pos]
-    e = calcular(esq, vals)
-    d = calcular(dir, vals)
+    if operador == 'not':
+        valor_direito = calcular(lado_direito_pedacos, valores)
+        return not valor_direito
 
-    if op == 'and':
-        return e and d
-    if op == 'or':
-        return e or d
-    if op == '->':
-        return (not e) or d
-    if op == 'XOR':
-        return e != d
-    if op == '<->':
-        return e == d
+    lado_esquerdo_pedacos = pedacos[:posicao_do_operador]
+
+    valor_esquerdo = calcular(lado_esquerdo_pedacos, valores)
+    valor_direito = calcular(lado_direito_pedacos, valores)
+
+    if operador == 'and':
+        return valor_esquerdo and valor_direito
+
+    if operador == 'or':
+        return valor_esquerdo or valor_direito
+
+    if operador == '->':
+        return (not valor_esquerdo) or valor_direito
+
+    if operador == 'XOR':
+        return valor_esquerdo != valor_direito
+
+    if operador == '<->':
+        return valor_esquerdo == valor_direito
 
 
 def rodar():
     print("\nOperadores: not | and | or | -> | XOR | <->")
     formula = input("Formula: ")
 
-    partes = separar_simbolos(formula)
-    letras = sorted(set(p for p in partes if len(p) == 1 and p.isupper()))
+    pedacos = separar_simbolos(formula)
+
+    letras_encontradas = []
+    for pedaco in pedacos:
+        if len(pedaco) == 1 and pedaco.isupper():
+            letras_encontradas.append(pedaco)
+
+    letras = sorted(set(letras_encontradas))
 
     combinacoes = [[]]
+
     for letra in letras:
-        novas = []
-        for c in combinacoes:
-            novas.append(c + [True])
-            novas.append(c + [False])
-        combinacoes = novas
+        novas_combinacoes = []
+        for combinacao_atual in combinacoes:
+            novas_combinacoes.append(combinacao_atual + [True])
+            novas_combinacoes.append(combinacao_atual + [False])
+        combinacoes = novas_combinacoes
 
     print()
-    for combinacao in combinacoes:
-        vals = {}
-        for j in range(len(letras)):
-            vals[letras[j]] = combinacao[j]
 
-        r = calcular(partes, vals)
-        print("V" if r else "F")
+    for combinacao in combinacoes:
+        valores = {}
+        for indice in range(len(letras)):
+            letra_atual = letras[indice]
+            valor_dessa_letra = combinacao[indice]
+            valores[letra_atual] = valor_dessa_letra
+
+        resultado = calcular(pedacos, valores)
+
+        if resultado:
+            print("V")
+        else:
+            print("F")
 
 
 while True:
     rodar()
-    if input("\nOutra? (s/n): ") != 's':
+    resposta = input("\nOutra? (s/n): ")
+    if resposta != 's':
         break
