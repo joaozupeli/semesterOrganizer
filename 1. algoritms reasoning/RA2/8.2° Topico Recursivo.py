@@ -4,15 +4,37 @@
 
 # Implemente uma função recursiva que imprime todos os números de `N` até `0`.
 
+# def decrescente(n):
+#   if n < 0:
+#     return 0
+#   print(n)
+#   decrescente(n-1)
 
-## 2. Imprimir números de 0 até N
+# print(decrescente(9))
+  
+
+
 
 # Implemente uma função recursiva que imprime todos os números de `0` até `N`.
 
+# def crescente(n):
+#   if n < 0:
+#     return 0
+#   crescente(n-1)
+#   print(n)
+
+# print(crescente(19))
 
 ## 3. Soma dos números de N até 0
 
 # Desenvolva uma função recursiva que retorna a soma de todos os números inteiros de `N` até `0`.
+
+# def soma_recursiva(n):
+#     if n < 0:
+#         return 0
+#     return n + soma_recursiva(n - 1)
+
+# print(soma_recursiva(6))
 
 
 ## 4. Soma dos dígitos de um número inteiro
@@ -26,6 +48,14 @@
 # Saída esperada:
 
 20
+
+def soma_digitos(numero):
+  if numero == 0:
+    return 0
+  return (numero % 10) + soma_digitos(numero // 10)
+
+
+print(soma_digitos(321))
 
 
 ## 5. Soma dos elementos de um vetor
@@ -52,18 +82,3 @@
 
 # Implemente o algoritmo Selection Sort para ordenar um vetor de inteiros usando recursividade.
 
-def selection_sort(vet, i=0):
-    if i == len(vet) - 1:
-        return vet
-
-    min_index = i
-
-    for j in range(i + 1, len(vet)):
-        if vet[j] < vet[min_index]:
-            min_index = j
-
-    temp = vet[i]
-    vet[i] = vet[min_index]
-    vet[min_index] = temp
-
-    return selection_sort(vet, i + 1)
