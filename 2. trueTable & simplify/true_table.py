@@ -42,7 +42,7 @@ def operador_principal(pedacos):
             else:
                 peso_atual = peso_dos_operadores[pedaco_atual]
 
-                if peso_atual <= peso_do_melhor_operador:
+                if peso_atual < peso_do_melhor_operador:
                     posicao_do_melhor_operador = i
                     peso_do_melhor_operador = peso_atual
 
